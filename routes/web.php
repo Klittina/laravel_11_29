@@ -21,25 +21,32 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+//a dashboard egy olyan
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
+//ezt bárki eléri aki be van jelentkezve
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::get('/order',[BookController::class, 'orderBooksbyAuthor']);
+    Route::get('/newest', [CopyController::class, 'theNewest']);
 });
 
 Route::middleware(['admin'])->group(function () {
     Route::delete('/api/books/{id}', [BookController::class, 'destroy']);
+    Route::get('/api/justuser', [UserController::class, 'justuser']);
 });
 
+//
 Route::middleware(['librarian'])->group(function () {
     Route::get('/api/books', [BookController::class, 'index']);
     Route::get('/api/books/{id}', [BookController::class, 'show']);
     Route::post('/api/books', [BookController::class, 'store']);
     Route::put('/api/books/{id}', [BookController::class, 'update']);
+    Route::get('/api/stock/{id}',[CopyController::class, 'inStock']);
 });
 
 Route::get("/testMyQueries/{db}", [CopyController::class, 'atLeast']);

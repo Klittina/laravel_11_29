@@ -3,10 +3,25 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use Dotenv\Validator;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Password;
 
 class UserController extends Controller
 {
+
+    
+        //hány sima felhasználó van
+
+        public function justuser(){
+            $user=DB::table('users')
+            ->where('permission','=',1)
+            ->count();
+            return $user;
+        }
+
     public function index(){
         $users =  User::all();
         return $users;
@@ -81,6 +96,7 @@ class UserController extends Controller
         $user = User::where("id", $id)->update([
             "password" => Hash::make($request->password),
         ]);
+
 
         return response()->json(["user" => $user]);
     }

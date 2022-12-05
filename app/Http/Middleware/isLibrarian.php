@@ -19,6 +19,8 @@ class isLibrarian
     {
         if (Auth::user() && Auth::user()->permission == 0 or Auth::user()->permission == 2) {
             return $next($request);
+            //0 az admin 2 a librarian amit a librarian elér azt az admin is eléri, de egy sima felhasználó már nem
+            //
         }
         return redirect('dashboard')->with('error', 'You have not admin access');
     }

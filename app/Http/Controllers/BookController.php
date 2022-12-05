@@ -79,4 +79,6 @@ class BookController extends Controller
     // Bejelentkezett felhasználó azon kölcsönzéseit add meg (copy_id és db), ahol egy példányt legalább db-szor (paraméteres fg) kölcsönzött ki! (együtt)
     // Hosszabbítsd meg a könyvet, ha nincs rá előjegyzés! (együtt)
 
+    
+
 }

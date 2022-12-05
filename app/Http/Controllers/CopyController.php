@@ -107,7 +107,7 @@ class CopyController extends Controller
     public function inStock($status)
     {
         $copies = DB::table('copies as c')
-            ->select('b.author', 'b.title')
+            ->select('author', 'title')
             ->where('c.status', '=', $status)
             ->count();
         return $copies;
@@ -152,5 +152,13 @@ class CopyController extends Controller
             ->get();
         // ->group// HAVING count(*) >= ?", Auth::user(), $db));
         return $answer;
+    }
+
+
+    //melyik a legujabb könyv a könyvtárban
+
+    public function theNewest(){
+        $maxyear =DB::select(DB::raw('select b.author, b.title from copies AS c, books AS b WHERE c.book_id=b.book_id and publication = (select max(publication) from copies)'));
+        return $maxyear;
     }
 }
