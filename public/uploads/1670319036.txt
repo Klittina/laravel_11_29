@@ -1,0 +1,147 @@
+create database kedvel
+
+use kedvel
+
+
+create table személy
+(
+azon int identity(100,1),
+név varchar(20),
+-- szdátum, névnap
+-- viszony (saját nyt),
+primary key (azon)
+)
+
+create table szótár
+(
+id int identity(1,1),
+érték char(30),
+típus char(1),
+primary key (id),
+unique (érték, típus)
+)
+
+create table dolog
+(
+dkód int identity(495,10),
+elnevezés varchar(30),
+besorolás int, --szótárazott
+primary key (dkód)
+)
+
+create table termék
+(
+tkód int identity(500,10),
+jellemzõ int,--szótárazott
+márka int, --szótárazott
+dolog int,
+-- megnev... 
+primary key (tkód),
+foreign key (dolog) references dolog (dkód)
+)
+
+create table kedvel
+(
+személy int,
+termék int,
+mérték tinyint, -- 0-5
+primary key (személy, termék),
+foreign key (személy) references személy (azon),
+foreign key (termék) references termék (tkód)
+)
+
+
+alter table szótár
+add constraint CK_szotar check (típus='B' or típus='J' or típus='M'  )
+
+alter table kedvel
+add constraint ck_kedvel check (mérték between 0 and 5)
+
+alter table személy
+add unique (név)
+
+go
+
+alter proc kedv_felv2
+-- paraméterei közül a jellemzõ és márka értéke lehet '---' ami az összesféle
+	@sz_neve varchar(20), 
+	@j_érték char(30), 
+	@m_érték char(30), 
+	@d_elnev varchar(30), 
+	@mérték tinyint
+
+as
+begin
+	if @sz_neve is null or @j_érték is null or @m_érték is null 
+		or @d_elnev is null or @mérték is null
+		print 'ki kell tölteni mindet; ha a jellemzõ vagy a márka tetszõleges, legyen ---'
+	else
+	begin
+	declare @azon int, @dkód int, @tkód int
+	declare @jid int, @mid int
+	-- az akt. gen. kulcsoknak
+	select @azon=azon from személy where név=@sz_neve
+	if @azon is null
+		begin
+			insert into személy values (@sz_neve)
+			set @azon=ident_current('személy')
+		end
+	select @dkód=dkód from dolog where elnevezés=@d_elnev
+	if @dkód is null
+		begin
+			insert into dolog values (@d_elnev, null)
+			set @dkód=ident_current('dolog')
+		end
+
+	select @jid=id from szótár where érték=@j_érték
+	if @jid is null
+		begin
+			insert into szótár values (@j_érték, 'J')
+			set @jid=ident_current('szótár')
+		end
+	
+	select @mid=id from szótár where érték=@m_érték
+	if @mid is null
+		begin
+			insert into szótár values (@m_érték, 'M')
+			set @mid=ident_current('szótár')
+		end
+	
+	select @tkód=tkód from termék
+	where dolog=@dkód and jellemzõ=@jid and márka=@mid
+	if @tkód is null
+		begin
+			insert into termék values (@jid, @mid, @dkód)
+			set @tkód=ident_current('termék')
+		end
+	insert into kedvel 
+	values (@azon, @tkód, @mérték)
+	-- a kulcs és a mérték a constr-re bízva
+	end
+end
+	
+exec kedv_felv 'Molnár Szabrina', 'mazsolás', '---', 'csoki', 1
+--delete from kedvel where személy=100 and termék=540
+--delete from termék where tkód=540 
+--delete from szótár where id=6
+
+select * from szótár 
+select * from dolog
+select * from termék
+select * from kedvel
+
+-------------------------------------------------------------------
+----------------------2022.12.05.----------------------------------
+-------------------------------------------------------------------
+
+alter table szótár
+add unique(érték, típus)
+
+exec kedv_felv 'Szedlár Krisztina','vodka','Absolut','Alkohol',5
+
+drop index [UQ__szótár__0B56801059AC4902] -- --szótár, indexes azatt 2 UQ szótár van, azt a számot kell ide beírni ha elakarjuk dobni
+-- mondjuk ez nem fut le és hibát ír,  keressük a megfelelõ verziót
+--ezek miatt a felsõ alter table szótár sem fog kelleni, i guess
+
+
+

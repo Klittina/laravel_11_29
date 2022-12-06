@@ -55,4 +55,10 @@ class ReservationController extends Controller
             ->count();
         return $reservation;
     }
+
+    //Kiknek van előjegyzése (név, email megjelenítése, könyvtáros  jog) - get kérés!
+    public function havereservation(){
+        $number= DB::select(DB::raw('select u.name, u.email from reservations as r, users as u where message>0'));
+        return $number;
+    }
 }

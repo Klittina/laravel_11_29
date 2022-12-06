@@ -7,6 +7,7 @@ use App\Models\Lending;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class LendingController extends Controller
 {
@@ -68,5 +69,22 @@ class LendingController extends Controller
         $users = User::all();
         $copies = Copy::all();
         return view('lending.new', ['users' => $users, 'copies' => $copies]);
+    }
+
+    //Listázd ki a mai napon visszahozott könyveket! - get kérés!
+    public function backtoday(){
+        $number= DB::select(DB::raw('select * from lendings as l where end=getdate()'));
+        return $number;
+    }
+
+    //jelenítsd eg azokat a könyveket, amik jelenleg nálma vannak
+    public function mybooksfornow(){
+        $mybooks = DB::table('lendings as l')
+        ->join('copies as c', 'l.copy_id','=','c.copy_id')
+        ->join('books as b', 'c.book_id','=','b.book_id')
+        ->where('l.user_id', '=', Auth::user()->id)
+        ->having('l.end','=',0)
+        ->get();
+
     }
 }

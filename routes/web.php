@@ -5,6 +5,9 @@ use App\Http\Controllers\CopyController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\MailController;
+use App\Http\Controllers\FileController;
+use App\Http\Controllers\LendingController;
 
 /*
 |--------------------------------------------------------------------------
@@ -33,6 +36,10 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     Route::get('/order',[BookController::class, 'orderBooksbyAuthor']);
     Route::get('/newest', [CopyController::class, 'theNewest']);
+    Route::get('/sendmail', [MailController::class, 'index']);
+    Route::get('/file_upload', [FileController::class, 'index']);
+    Route::post('/file_upload', [FileController::class, 'store'])->name('file.store');
+    Route::get('/mybooksfornow', [LendingController::class, 'mybooksfornow']);
 });
 
 Route::middleware(['admin'])->group(function () {
@@ -47,6 +54,8 @@ Route::middleware(['librarian'])->group(function () {
     Route::post('/api/books', [BookController::class, 'store']);
     Route::put('/api/books/{id}', [BookController::class, 'update']);
     Route::get('/api/stock/{id}',[CopyController::class, 'inStock']);
+    Route::get('/api/backtoday',[LendingController::class, 'backtoday']);
+    Route::get('/api/havereservation',[ReservationController::class, 'havereservation']);
 });
 
 Route::get("/testMyQueries/{db}", [CopyController::class, 'atLeast']);
